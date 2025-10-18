@@ -86,7 +86,18 @@ def marketplace_account_deletion():
             verification_token = os.getenv('EBAY_VERIFICATION_TOKEN', '18b5fde2d11c4692146c0983ee079343c0cf103c7e0ed69c33c46d8923a43b1e')
             
             # Construct the full endpoint URL
-            endpoint = request.url_root.rstrip('/') + '/webhook/marketplace-account-deletion'
+            # Check if behind a proxy (like ngrok) and use the forwarded host/proto
+            forwarded_proto = request.headers.get('X-Forwarded-Proto', 'https')
+            forwarded_host = request.headers.get('X-Forwarded-Host') or request.headers.get('Host')
+            
+            if forwarded_host:
+                endpoint = f"{forwarded_proto}://{forwarded_host}/webhook/marketplace-account-deletion"
+            else:
+                # Fallback to environment variable or request URL
+                endpoint = os.getenv('EBAY_ENDPOINT_URL')
+                if not endpoint:
+                    endpoint = request.url_root.rstrip('/') + '/webhook/marketplace-account-deletion'
+                    endpoint = endpoint.replace('http://', 'https://')  # Force https
             
             # Compute SHA256 hash: challengeCode + verificationToken + endpoint
             hash_string = challenge_code + verification_token + endpoint

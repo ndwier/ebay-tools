@@ -1,0 +1,33 @@
+# Example GitHub Actions workflow
+# Rename to .github/workflows/docker-build.yml if you want to use it
+
+name: Build Docker Image
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Build Docker image
+      run: docker build -t ebay-automation:latest .
+    
+    - name: Test Docker image
+      run: |
+        docker run -d --name test-container \
+          -e EBAY_APP_ID=test \
+          -e EBAY_CERT_ID=test \
+          -e EBAY_DEV_ID=test \
+          -e EBAY_TOKEN=test \
+          ebay-automation:latest
+        sleep 5
+        docker logs test-container
+        docker stop test-container
+

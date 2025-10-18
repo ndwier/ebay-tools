@@ -1,0 +1,46 @@
+# eBay API Configuration
+# Get your credentials from: https://developer.ebay.com/my/keys
+
+# Production (Live) Credentials
+EBAY_APP_ID=your_app_id_here
+EBAY_CERT_ID=your_cert_id_here
+EBAY_DEV_ID=your_dev_id_here
+EBAY_TOKEN=your_oauth_token_here
+
+# Environment: production or sandbox
+EBAY_ENV=production
+
+# Application Settings
+FLASK_SECRET_KEY=change_this_to_a_random_secret_key
+FLASK_PORT=5001
+FLASK_HOST=0.0.0.0
+
+# Database
+DATABASE_PATH=/data/ebay_automation.db
+
+# Automation Settings
+# How many days before a listing is considered stale
+STALE_LISTING_DAYS=30
+
+# Minimum number of views before sending offers
+MIN_VIEWS_FOR_OFFER=5
+
+# Offer discount percentage (e.g., 10 for 10% off)
+OFFER_DISCOUNT_PERCENT=10
+
+# Days after sale to request feedback
+FEEDBACK_REQUEST_DAYS=7
+
+# Scheduler Settings (cron format)
+# Check for stale listings daily at 2 AM
+STALE_CHECK_SCHEDULE=0 2 * * *
+
+# Check for offer opportunities daily at 10 AM
+OFFER_CHECK_SCHEDULE=0 10 * * *
+
+# Check for feedback requests daily at 3 PM
+FEEDBACK_CHECK_SCHEDULE=0 15 * * *
+
+# Logging
+LOG_LEVEL=INFO
+

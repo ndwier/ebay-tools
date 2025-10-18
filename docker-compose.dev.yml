@@ -1,0 +1,24 @@
+# Development override for docker-compose
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+version: '3.8'
+
+services:
+  ebay-automation:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      # Mount source code for hot reload during development
+      - ./app.py:/app/app.py
+      - ./ebay_api.py:/app/ebay_api.py
+      - ./automation.py:/app/automation.py
+      - ./scheduler.py:/app/scheduler.py
+      - ./models.py:/app/models.py
+      - ./config.py:/app/config.py
+      - ./templates:/app/templates
+    environment:
+      - FLASK_ENV=development
+      - LOG_LEVEL=DEBUG
+    command: python -u app.py
+

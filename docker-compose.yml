@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  ebay-automation:
+    build: .
+    container_name: ebay-automation
+    restart: unless-stopped
+    ports:
+      - "5001:5001"
+    volumes:
+      # Persist database
+      - ./data:/data
+      # Persist logs
+      - ./logs:/app/logs
+    env_file:
+      - .env
+    environment:
+      - TZ=America/New_York  # Adjust to your timezone
+    networks:
+      - ebay-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  ebay-net:
+    driver: bridge
+

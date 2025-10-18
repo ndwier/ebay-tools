@@ -44,3 +44,7 @@ FEEDBACK_CHECK_SCHEDULE=0 15 * * *
 # Logging
 LOG_LEVEL=INFO
 
+# eBay Webhook Verification Token (32-80 characters)
+# This must match the token you enter in eBay Developer Portal
+EBAY_VERIFICATION_TOKEN=18b5fde2d11c4692146c0983ee079343c0cf103c7e0ed69c33c46d8923a43b1e
+

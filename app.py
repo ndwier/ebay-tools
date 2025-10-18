@@ -1,6 +1,7 @@
 """Flask application for eBay automation dashboard."""
 import logging
 import os
+import hashlib
 from datetime import datetime
 from flask import Flask, render_template, jsonify, request
 
@@ -77,16 +78,26 @@ def marketplace_account_deletion():
         # eBay verification challenge
         challenge_code = request.args.get('challenge_code')
         
-        # Verification token from eBay (optional but recommended)
-        verification_token = request.headers.get('X-EBAY-SIGNATURE')
-        if verification_token:
-            logger.info(f"Received verification token: {verification_token[:10]}...")
-        
         if challenge_code:
             logger.info(f"Received eBay verification challenge: {challenge_code}")
-            # Return the challenge in required format
+            
+            # eBay requires SHA256 hash of: challengeCode + verificationToken + endpoint
+            # Get verification token from environment
+            verification_token = os.getenv('EBAY_VERIFICATION_TOKEN', '18b5fde2d11c4692146c0983ee079343c0cf103c7e0ed69c33c46d8923a43b1e')
+            
+            # Construct the full endpoint URL
+            endpoint = request.url_root.rstrip('/') + '/webhook/marketplace-account-deletion'
+            
+            # Compute SHA256 hash: challengeCode + verificationToken + endpoint
+            hash_string = challenge_code + verification_token + endpoint
+            hash_object = hashlib.sha256(hash_string.encode('utf-8'))
+            challenge_response = hash_object.hexdigest()
+            
+            logger.info(f"Computed challenge response hash for endpoint: {endpoint}")
+            
+            # Return the hashed challenge response
             response = {
-                'challengeResponse': challenge_code
+                'challengeResponse': challenge_response
             }
             return jsonify(response), 200
         return jsonify({'error': 'No challenge code provided'}), 400

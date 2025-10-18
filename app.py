@@ -76,6 +76,12 @@ def marketplace_account_deletion():
     if request.method == 'GET':
         # eBay verification challenge
         challenge_code = request.args.get('challenge_code')
+        
+        # Verification token from eBay (optional but recommended)
+        verification_token = request.headers.get('X-EBAY-SIGNATURE')
+        if verification_token:
+            logger.info(f"Received verification token: {verification_token[:10]}...")
+        
         if challenge_code:
             logger.info(f"Received eBay verification challenge: {challenge_code}")
             # Return the challenge in required format

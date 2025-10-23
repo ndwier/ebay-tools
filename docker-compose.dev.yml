@@ -22,3 +22,4 @@ services:
       - LOG_LEVEL=DEBUG
     command: python -u app.py
 
+

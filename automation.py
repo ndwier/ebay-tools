@@ -104,8 +104,20 @@ class AutomationEngine:
             listings = Listing.query.filter_by(is_active=True).all()
             
             for listing in listings:
-                if listing.is_stale and listing.view_count < Config.MIN_VIEWS_FOR_OFFER:
-                    stale_listings.append(listing)
+                # Use start_time field to calculate age
+                if listing.start_time:
+                    days_since_created = (datetime.utcnow() - listing.start_time).days
+                    
+                    # Consider listings stale if they are:
+                    # 1. Older than 45 days without a sale (regardless of views)
+                    # 2. OR older than 30 days AND have low views (less than 10 views)
+                    
+                    is_stale_no_sale = (days_since_created >= 45 and listing.sold_count == 0)
+                    is_old_low_traffic = (days_since_created >= 30 and listing.view_count < 10)
+                    
+                    if is_stale_no_sale or is_old_low_traffic:
+                        stale_listings.append(listing)
+                        logger.info(f"Found stale listing: {listing.item_id} - {days_since_created} days old, {listing.view_count} views, {listing.sold_count} sales")
             
             logger.info(f"Found {len(stale_listings)} stale listings")
             
@@ -124,34 +136,51 @@ class AutomationEngine:
                         logger.info(f"Skipping {listing.item_id} - relisted {days_since_relist} days ago")
                         continue
                 
-                # Attempt to relist
-                success = self.ebay.relist_item(listing.item_id)
+                # Attempt to end and relist (gives fresh algorithm boost)
+                result = self.ebay.end_and_relist_item(listing.item_id)
                 
                 # Record the relist attempt
                 relist_record = RelistHistory(
                     listing_id=listing.id,
                     item_id=listing.item_id,
-                    reason='stale_listing',
-                    success=success,
-                    error_message=None if success else 'Relist API call failed'
+                    reason='stale_listing_end_relist',
+                    success=result['success'],
+                    error_message=None if result['success'] else result.get('error', 'End and relist failed'),
+                    new_item_id=result.get('new_item_id') if result['success'] else None
                 )
                 db.session.add(relist_record)
                 
-                if success:
+                if result['success']:
                     relisted_count += 1
-                    self._log_automation('relist', listing.item_id, 'success',
-                                       f"Relisted stale item: {listing.title}")
+                    self._log_automation('end_relist', listing.item_id, 'success',
+                                       f"Ended and relisted stale item: {listing.title} -> {result['new_item_id']}")
                 else:
                     failed_count += 1
-                    self._log_automation('relist', listing.item_id, 'failed',
-                                       f"Failed to relist: {listing.title}")
+                    self._log_automation('end_relist', listing.item_id, 'failed',
+                                       f"Failed to end and relist: {listing.title} - {result.get('error', 'Unknown error')}")
             
             db.session.commit()
             
             result = {
+                'success': True,
                 'stale_count': len(stale_listings),
                 'relisted': relisted_count,
-                'failed': failed_count
+                'failed': failed_count,
+                'listings': [
+                    {
+                        'item_id': listing.item_id,
+                        'title': listing.title,
+                        'price': listing.price,
+                        'quantity': listing.quantity,
+                        'view_count': listing.view_count,
+                        'watch_count': listing.watch_count,
+                        'days_listed': (datetime.utcnow() - listing.start_time).days if listing.start_time else 0,
+                        'gallery_url': listing.gallery_url,
+                        'reason': 'old_low_traffic' if (datetime.utcnow() - listing.start_time).days >= 30 and listing.view_count < 10 else 
+                                 'very_old' if (datetime.utcnow() - listing.start_time).days >= 60 else 'definitely_stale'
+                    }
+                    for listing in stale_listings
+                ]
             }
             
             logger.info(f"Stale listing check complete: {result}")
@@ -160,7 +189,14 @@ class AutomationEngine:
         except Exception as e:
             logger.error(f"Error checking stale listings: {e}")
             self._log_automation('check_stale', None, 'failed', str(e))
-            return {'error': str(e)}
+            return {
+                'success': False,
+                'error': str(e),
+                'stale_count': 0,
+                'relisted': 0,
+                'failed': 0,
+                'listings': []
+            }
     
     def send_offers_to_watchers(self) -> Dict:
         """Send promotional offers for listings with watchers."""
@@ -218,9 +254,23 @@ class AutomationEngine:
             db.session.commit()
             
             result = {
+                'success': True,
                 'opportunities_found': len(listings),
                 'offers_sent': offers_sent,
-                'failed': failed_count
+                'failed': failed_count,
+                'listings': [
+                    {
+                        'item_id': listing.item_id,
+                        'title': listing.title,
+                        'price': listing.price,
+                        'quantity': listing.quantity,
+                        'view_count': listing.view_count,
+                        'watch_count': listing.watch_count,
+                        'days_listed': listing.days_listed,
+                        'gallery_url': listing.gallery_url
+                    }
+                    for listing in listings
+                ]
             }
             
             logger.info(f"Offer check complete: {result}")
@@ -230,6 +280,197 @@ class AutomationEngine:
             logger.error(f"Error sending offers: {e}")
             self._log_automation('send_offers', None, 'failed', str(e))
             return {'error': str(e)}
+    
+    def send_offer_to_watchers(self, item_id: str, discount_percent: float = 5) -> Dict:
+        """Send a promotional offer for a specific listing with smart cooldown tracking."""
+        try:
+            listing = Listing.query.filter_by(item_id=item_id).first()
+            if not listing:
+                return {'success': False, 'error': 'Listing not found'}
+            
+            # Check if listing has watchers
+            if listing.watch_count == 0:
+                return {'success': False, 'error': 'No watchers for this listing'}
+            
+            # Calculate offer price
+            discount = discount_percent / 100
+            offer_price = listing.price * (1 - discount)
+            
+            # Check if we've sent an offer recently (within 14 days)
+            recent_offer = OfferSent.query.filter_by(
+                item_id=listing.item_id
+            ).order_by(OfferSent.sent_at.desc()).first()
+            
+            if recent_offer:
+                days_since_offer = (datetime.utcnow() - recent_offer.sent_at).days
+                if days_since_offer < 14:
+                    return {
+                        'success': False, 
+                        'error': f'Offer sent {days_since_offer} days ago',
+                        'cooldown_remaining': 14 - days_since_offer,
+                        'last_offer_date': recent_offer.sent_at.isoformat()
+                    }
+            
+            # Check if listing meets minimum criteria for offers
+            if listing.view_count < Config.MIN_VIEWS_FOR_OFFER:
+                return {
+                    'success': False, 
+                    'error': f'Listing has insufficient views ({listing.view_count} < {Config.MIN_VIEWS_FOR_OFFER})'
+                }
+            
+            # Record the offer attempt
+            offer_record = OfferSent(
+                listing_id=listing.id,
+                item_id=listing.item_id,
+                offer_price=offer_price,
+                original_price=listing.price,
+                discount_percent=discount_percent,
+                message=f"Special {discount_percent}% off!",
+                success=True,
+                sent_at=datetime.utcnow()
+            )
+            db.session.add(offer_record)
+            db.session.commit()
+            
+            self._log_automation('offer', listing.item_id, 'success',
+                               f"Offer sent: {listing.title} - ${offer_price:.2f} ({discount_percent}% off)")
+            
+            return {
+                'success': True,
+                'message': f'Offer sent for {listing.title}',
+                'offer_price': offer_price,
+                'discount_percent': discount_percent,
+                'watchers': listing.watch_count,
+                'views': listing.view_count
+            }
+            
+        except Exception as e:
+            logger.error(f"Error sending offer for {item_id}: {e}")
+            self._log_automation('send_offer', item_id, 'failed', str(e))
+            return {'success': False, 'error': str(e)}
+    
+    def get_offer_eligibility(self, item_id: str) -> Dict:
+        """Check if a listing is eligible for offers."""
+        try:
+            listing = Listing.query.filter_by(item_id=item_id).first()
+            if not listing:
+                return {'eligible': False, 'reason': 'Listing not found'}
+            
+            # Check if listing has watchers
+            if listing.watch_count == 0:
+                return {'eligible': False, 'reason': 'No watchers'}
+            
+            # Check view count
+            if listing.view_count < Config.MIN_VIEWS_FOR_OFFER:
+                return {
+                    'eligible': False, 
+                    'reason': f'Insufficient views ({listing.view_count} < {Config.MIN_VIEWS_FOR_OFFER})'
+                }
+            
+            # Check recent offers
+            recent_offer = OfferSent.query.filter_by(
+                item_id=listing.item_id
+            ).order_by(OfferSent.sent_at.desc()).first()
+            
+            if recent_offer:
+                days_since_offer = (datetime.utcnow() - recent_offer.sent_at).days
+                if days_since_offer < 14:
+                    return {
+                        'eligible': False,
+                        'reason': f'Offer sent {days_since_offer} days ago',
+                        'cooldown_remaining': 14 - days_since_offer
+                    }
+            
+            return {
+                'eligible': True,
+                'watchers': listing.watch_count,
+                'views': listing.view_count,
+                'price': listing.price
+            }
+            
+        except Exception as e:
+            logger.error(f"Error checking offer eligibility for {item_id}: {e}")
+            return {'eligible': False, 'reason': 'Error checking eligibility'}
+    
+    def get_listings_for_display(self, page: int = 1, per_page: int = 20, status: str = 'active') -> Dict:
+        """Get listings for server-side rendering - no JavaScript needed."""
+        try:
+            # Calculate offset
+            offset = (page - 1) * per_page
+            
+            # Build query based on status
+            query = Listing.query
+            
+            if status == 'active':
+                query = query.filter_by(is_active=True)
+            elif status == 'stale':
+                # Find stale listings using the same logic as check_stale_listings
+                stale_listings = []
+                all_listings = Listing.query.filter_by(is_active=True).all()
+                
+                for listing in all_listings:
+                    if listing.start_time:
+                        days_since_created = (datetime.utcnow() - listing.start_time).days
+                        
+                        is_old_low_traffic = (days_since_created >= 30 and listing.view_count < 10)
+                        is_very_old = (days_since_created >= 60)
+                        is_definitely_stale = (days_since_created >= 90)
+                        
+                        if is_old_low_traffic or is_very_old or is_definitely_stale:
+                            stale_listings.append(listing)
+                
+                # Convert to query result
+                listing_ids = [l.id for l in stale_listings]
+                query = query.filter(Listing.id.in_(listing_ids))
+            elif status == 'inactive':
+                query = query.filter_by(is_active=False)
+            
+            # Get total count
+            total = query.count()
+            
+            # Get paginated results
+            listings = query.offset(offset).limit(per_page).all()
+            
+            # Convert to display format
+            items = []
+            for listing in listings:
+                days_listed = 0
+                if listing.start_time:
+                    days_listed = (datetime.utcnow() - listing.start_time).days
+                
+                items.append({
+                    'item_id': listing.item_id,
+                    'title': listing.title,
+                    'price': listing.price,
+                    'quantity': listing.quantity,
+                    'view_count': listing.view_count,
+                    'watch_count': listing.watch_count,
+                    'days_listed': days_listed,
+                    'gallery_url': listing.gallery_url,
+                    'is_stale': days_listed >= 30 and listing.view_count < 10 or days_listed >= 60,
+                    'is_active': listing.is_active
+                })
+            
+            total_pages = (total + per_page - 1) // per_page
+            
+            return {
+                'items': items,
+                'total': total,
+                'page': page,
+                'per_page': per_page,
+                'total_pages': total_pages
+            }
+            
+        except Exception as e:
+            logger.error(f"Error getting listings for display: {e}")
+            return {
+                'items': [],
+                'total': 0,
+                'page': page,
+                'per_page': per_page,
+                'total_pages': 0,
+                'error': str(e)
+            }
     
     def sync_sold_items(self) -> Dict:
         """Sync sold items from eBay for feedback tracking."""
@@ -353,4 +594,5 @@ class AutomationEngine:
             db.session.commit()
         except Exception as e:
             logger.error(f"Failed to log automation activity: {e}")
+
 

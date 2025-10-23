@@ -56,13 +56,14 @@ class RelistHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     listing_id = db.Column(db.Integer, db.ForeignKey('listings.id'), nullable=False)
     item_id = db.Column(db.String(50), nullable=False, index=True)
+    new_item_id = db.Column(db.String(50), nullable=True, index=True)  # For end and relist operations
     relisted_at = db.Column(db.DateTime, default=datetime.utcnow)
     reason = db.Column(db.String(100))
     success = db.Column(db.Boolean, default=True)
     error_message = db.Column(db.Text)
     
     def __repr__(self):
-        return f'<RelistHistory {self.item_id} at {self.relisted_at}>'
+        return f'<RelistHistory {self.item_id} -> {self.new_item_id} at {self.relisted_at}>'
 
 
 class OfferSent(db.Model):
@@ -159,4 +160,63 @@ class Settings(db.Model):
     
     def __repr__(self):
         return f'<Setting {self.key}={self.value}>'
+
+
+class PoshmarkListing(db.Model):
+    """Track Poshmark listings scraped from users."""
+    
+    __tablename__ = 'poshmark_listings'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    poshmark_id = db.Column(db.String(100), unique=True, nullable=False, index=True)
+    poshmark_url = db.Column(db.String(500), nullable=False)
+    title = db.Column(db.String(200), nullable=False)
+    price = db.Column(db.Float)
+    original_price = db.Column(db.Float)
+    description = db.Column(db.Text)
+    brand = db.Column(db.String(100))
+    size = db.Column(db.String(50))
+    category = db.Column(db.String(100))
+    condition = db.Column(db.String(50))
+    seller_username = db.Column(db.String(100))
+    images = db.Column(db.Text)  # JSON string of image URLs
+    tags = db.Column(db.Text)    # JSON string of tags
+    scraped_at = db.Column(db.DateTime, default=datetime.utcnow)
+    last_updated = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationship to eBay drafts
+    ebay_drafts = db.relationship('EbayDraft', backref='poshmark_listing', lazy=True, cascade='all, delete-orphan')
+    
+    def __repr__(self):
+        return f'<PoshmarkListing {self.poshmark_id}: {self.title}>'
+
+
+class EbayDraft(db.Model):
+    """Track eBay draft listings created from Poshmark listings."""
+    
+    __tablename__ = 'ebay_drafts'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    poshmark_listing_id = db.Column(db.Integer, db.ForeignKey('poshmark_listings.id'), nullable=False)
+    ebay_item_id = db.Column(db.String(50), unique=True, index=True)  # Set when published
+    title = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text)
+    price = db.Column(db.Float)
+    quantity = db.Column(db.Integer, default=1)
+    category_id = db.Column(db.String(50))
+    condition_id = db.Column(db.String(50))
+    condition_description = db.Column(db.String(200))
+    images = db.Column(db.Text)  # JSON string of image URLs
+    location = db.Column(db.String(100), default='United States')
+    listing_duration = db.Column(db.String(20), default='GTC')  # Good 'Til Cancelled
+    listing_type = db.Column(db.String(20), default='FixedPriceItem')
+    status = db.Column(db.String(20), default='draft')  # draft, published, failed
+    error_message = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    last_updated = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    published_at = db.Column(db.DateTime)
+    
+    def __repr__(self):
+        return f'<EbayDraft {self.id}: {self.title}>'
+
 

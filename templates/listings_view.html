@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>eBay Listings - Server Rendered</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            color: #0066cc;
+            margin: 0 0 10px 0;
+        }
+        
+        .controls {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .control-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            background: #0066cc;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            background: #0056b3;
+        }
+        
+        .btn-success {
+            background: #28a745;
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+        }
+        
+        select, input {
+            padding: 6px 10px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            font-size: 0.9rem;
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            background: #f8f9fa;
+            padding: 10px 8px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        td {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            vertical-align: middle;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .listing-image {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 3px;
+        }
+        
+        .listing-title {
+            max-width: 200px;
+            font-size: 0.85rem;
+            line-height: 1.2;
+            word-wrap: break-word;
+        }
+        
+        .price-input, .qty-input {
+            width: 70px;
+            padding: 3px 5px;
+            border: 1px solid #ddd;
+            border-radius: 2px;
+            font-size: 0.85rem;
+        }
+        
+        .price-input:focus, .qty-input:focus {
+            outline: none;
+            border-color: #0066cc;
+        }
+        
+        .action-btn {
+            padding: 3px 6px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 2px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin: 1px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .action-btn:hover {
+            background: #f8f9fa;
+        }
+        
+        .action-btn.save {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+        
+        .action-btn.relist {
+            background: #ffc107;
+            color: #333;
+            border-color: #ffc107;
+        }
+        
+        .action-btn.offer {
+            background: #17a2b8;
+            color: white;
+            border-color: #17a2b8;
+        }
+        
+        .badge {
+            padding: 2px 4px;
+            border-radius: 2px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .badge-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .pagination {
+            padding: 10px;
+            text-align: center;
+            background: #f8f9fa;
+            border-top: 1px solid #ddd;
+        }
+        
+        .pagination a {
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            background: white;
+            text-decoration: none;
+            color: #333;
+            margin: 0 2px;
+            display: inline-block;
+        }
+        
+        .pagination a:hover {
+            background: #f8f9fa;
+        }
+        
+        .pagination .current {
+            background: #0066cc;
+            color: white;
+        }
+        
+        .pagination .disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 3px;
+            margin-bottom: 20px;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 3px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .control-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>eBay Listings - Server Rendered</h1>
+            <p>No JavaScript flashing - completely server-side rendered</p>
+        </div>
+        
+        {% if error %}
+        <div class="error">
+            <strong>Error:</strong> {{ error }}
+        </div>
+        {% endif %}
+        
+        <div class="controls">
+            <div class="control-row">
+                <a href="/listings?status=active&page=1" class="btn {% if status == 'active' %}btn-success{% endif %}">Active Listings</a>
+                <a href="/listings?status=stale&page=1" class="btn {% if status == 'stale' %}btn-success{% endif %}">Stale Listings</a>
+                <a href="/listings?status=inactive&page=1" class="btn {% if status == 'inactive' %}btn-success{% endif %}">Inactive Listings</a>
+                <a href="/api/sync" class="btn btn-warning">Sync Listings</a>
+                <a href="/api/check-stale" class="btn btn-warning">Check Stale</a>
+                <a href="/api/check-offers" class="btn btn-success">Check Offers</a>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Title</th>
+                        <th>Price</th>
+                        <th>Qty</th>
+                        <th>Views</th>
+                        <th>Watchers</th>
+                        <th>Days</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if listings %}
+                        {% for listing in listings %}
+                        <tr>
+                            <td>
+                                <img src="{{ listing.gallery_url or '/static/images/no-image.png' }}" 
+                                     alt="{{ listing.title }}" 
+                                     class="listing-image">
+                            </td>
+                            <td>
+                                <div class="listing-title">{{ listing.title }}</div>
+                            </td>
+                            <td>
+                                <input type="number" 
+                                       step="0.01" 
+                                       value="{{ "%.2f"|format(listing.price) }}" 
+                                       class="price-input" 
+                                       data-item-id="{{ listing.item_id }}">
+                            </td>
+                            <td>
+                                <input type="number" 
+                                       value="{{ listing.quantity }}" 
+                                       class="qty-input" 
+                                       data-item-id="{{ listing.item_id }}">
+                            </td>
+                            <td>{{ listing.view_count }}</td>
+                            <td>{{ listing.watch_count }}</td>
+                            <td>{{ listing.days_listed }}</td>
+                            <td>
+                                {% if listing.is_stale %}
+                                    <span class="badge badge-warning">Stale</span>
+                                {% elif listing.is_active %}
+                                    <span class="badge badge-success">Active</span>
+                                {% else %}
+                                    <span class="badge badge-danger">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="/api/listings/{{ listing.item_id }}/price" 
+                                   class="action-btn save" 
+                                   onclick="return updatePrice('{{ listing.item_id }}', this)">Save</a>
+                                <a href="/api/relist/{{ listing.item_id }}" 
+                                   class="action-btn relist">Relist</a>
+                                <a href="/api/send-offer/{{ listing.item_id }}" 
+                                   class="action-btn offer">Offer</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="9" class="loading">
+                                {% if status == 'active' %}
+                                    No active listings found.
+                                {% elif status == 'stale' %}
+                                    No stale listings found.
+                                {% elif status == 'inactive' %}
+                                    No inactive listings found.
+                                {% else %}
+                                    No listings found.
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% if total_pages > 1 %}
+        <div class="pagination">
+            {% if page > 1 %}
+                <a href="/listings?status={{ status }}&page={{ page - 1 }}">Previous</a>
+            {% else %}
+                <span class="disabled">Previous</span>
+            {% endif %}
+            
+            {% for p in range(1, total_pages + 1) %}
+                {% if p == page %}
+                    <span class="current">{{ p }}</span>
+                {% else %}
+                    <a href="/listings?status={{ status }}&page={{ p }}">{{ p }}</a>
+                {% endif %}
+            {% endfor %}
+            
+            {% if page < total_pages %}
+                <a href="/listings?status={{ status }}&page={{ page + 1 }}">Next</a>
+            {% else %}
+                <span class="disabled">Next</span>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <div style="margin-top: 20px; text-align: center;">
+            <p><strong>Server-Side Rendered Listings</strong></p>
+            <p>Showing {{ listings|length }} of {{ total }} listings (Page {{ page }} of {{ total_pages }})</p>
+            <p>✅ No JavaScript flashing - completely server-side rendered</p>
+            <p>✅ Interactive forms - submit to update prices/quantities</p>
+            <p>✅ Direct action links - relist, send offers</p>
+        </div>
+    </div>
+
+    <script>
+        // Minimal JavaScript for form submissions only
+        function updatePrice(itemId, element) {
+            const priceInput = document.querySelector(`input[data-item-id="${itemId}"].price-input`);
+            const qtyInput = document.querySelector(`input[data-item-id="${itemId}"].qty-input`);
+            
+            if (priceInput && qtyInput) {
+                const price = priceInput.value;
+                const quantity = qtyInput.value;
+                
+                // Create form and submit
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/api/listings/${itemId}/update`;
+                
+                const priceField = document.createElement('input');
+                priceField.type = 'hidden';
+                priceField.name = 'price';
+                priceField.value = price;
+                
+                const qtyField = document.createElement('input');
+                qtyField.type = 'hidden';
+                qtyField.name = 'quantity';
+                qtyField.value = quantity;
+                
+                form.appendChild(priceField);
+                form.appendChild(qtyField);
+                document.body.appendChild(form);
+                form.submit();
+                
+                return false;
+            }
+            return false;
+        }
+    </script>
+</body>
+</html>

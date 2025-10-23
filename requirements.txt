@@ -29,3 +29,8 @@ colorlog==6.8.0
 # WSGI server for production
 gunicorn==21.2.0
 
+# Poshmark scraping dependencies
+selenium==4.15.2
+webdriver-manager==4.0.1
+beautifulsoup4==4.12.2
+Pillow==10.1.0

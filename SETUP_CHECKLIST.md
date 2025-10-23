@@ -246,3 +246,4 @@ Congratulations! Your eBay store is now automated. The system will:
 **Difficulty:** Easy (if following steps)
 **Maintenance:** < 5 minutes per week
 
+

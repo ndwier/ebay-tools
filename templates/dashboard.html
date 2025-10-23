@@ -3,44 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>eBay Store Automation Dashboard</title>
+    <title>eBay Management Platform</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: #f5f7fa;
-            color: #2c3e50;
-            line-height: 1.6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
         }
         
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 20px;
         }
         
-        header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px 20px;
-            border-radius: 10px;
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
             margin-bottom: 30px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
         }
         
-        h1 {
-            font-size: 2rem;
-            margin-bottom: 10px;
+        .header h1 {
+            color: #2c3e50;
+            margin: 0 0 10px 0;
+            font-size: 2.5rem;
+            font-weight: 300;
         }
         
-        .subtitle {
-            opacity: 0.9;
+        .header p {
+            color: #7f8c8d;
             font-size: 1.1rem;
+            margin: 0;
         }
         
         .stats-grid {
@@ -51,307 +49,681 @@
         }
         
         .stat-card {
-            background: white;
+            background: rgba(255, 255, 255, 0.95);
             padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
         }
         
         .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
         }
         
         .stat-label {
-            font-size: 0.875rem;
+            font-size: 0.9rem;
             color: #7f8c8d;
+            margin-bottom: 10px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
+            letter-spacing: 1px;
         }
         
         .stat-value {
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: 700;
             color: #2c3e50;
+            margin: 0;
         }
         
-        .actions-section {
-            background: white;
+        .controls {
+            background: rgba(255, 255, 255, 0.95);
             padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 15px;
             margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
         }
         
-        .actions-section h2 {
-            margin-bottom: 20px;
+        .controls h2 {
+            margin: 0 0 20px 0;
             color: #2c3e50;
+            font-size: 1.5rem;
+            font-weight: 400;
         }
         
-        .action-buttons {
-            display: flex;
+        .control-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
-            flex-wrap: wrap;
         }
         
         .btn {
-            padding: 12px 24px;
+            padding: 15px 25px;
             border: none;
-            border-radius: 6px;
-            font-size: 1rem;
+            border-radius: 10px;
             cursor: pointer;
-            transition: all 0.2s;
-            font-weight: 500;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
         }
         
         .btn-primary {
-            background: #3498db;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-        }
-        
-        .btn-primary:hover {
-            background: #2980b9;
         }
         
         .btn-success {
-            background: #2ecc71;
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
             color: white;
-        }
-        
-        .btn-success:hover {
-            background: #27ae60;
         }
         
         .btn-warning {
-            background: #f39c12;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             color: white;
         }
         
-        .btn-warning:hover {
-            background: #e67e22;
+        .btn-info {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
         }
         
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        .listings-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
         }
         
-        .logs-section {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        .listings-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 25px;
+            margin: 0;
         }
         
-        .logs-section h2 {
-            margin-bottom: 20px;
+        .listings-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 400;
+        }
+        
+        .listings-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .listings-table th {
+            background: #f8f9fa;
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #2c3e50;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .listings-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: middle;
+        }
+        
+        .listings-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .listing-image {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .listing-title {
+            max-width: 300px;
+            font-size: 0.9rem;
+            line-height: 1.4;
             color: #2c3e50;
         }
         
-        .log-list {
-            max-height: 400px;
-            overflow-y: auto;
+        .price-input, .qty-input {
+            width: 80px;
+            padding: 8px 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            transition: border-color 0.3s ease;
         }
         
-        .log-item {
-            padding: 12px;
-            border-bottom: 1px solid #ecf0f1;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .price-input:focus, .qty-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
         
-        .log-item:last-child {
-            border-bottom: none;
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin: 2px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
         }
         
-        .log-status {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.875rem;
-            font-weight: 500;
+        .action-btn:hover {
+            transform: translateY(-1px);
         }
         
-        .log-status.success {
+        .action-btn.save {
+            background: #28a745;
+            color: white;
+        }
+        
+        .action-btn.relist {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .action-btn.offer {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .badge-success {
             background: #d4edda;
             color: #155724;
         }
         
-        .log-status.failed {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        
-        .log-status.skipped {
+        .badge-warning {
             background: #fff3cd;
             color: #856404;
         }
         
-        .log-time {
-            color: #95a5a6;
-            font-size: 0.875rem;
-        }
-        
-        .jobs-section {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-        
-        .jobs-section h2 {
-            margin-bottom: 20px;
-            color: #2c3e50;
-        }
-        
-        .job-item {
-            padding: 15px;
-            border-left: 4px solid #3498db;
-            background: #f8f9fa;
-            margin-bottom: 10px;
-            border-radius: 4px;
-        }
-        
-        .job-name {
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-        
-        .job-next {
-            color: #7f8c8d;
-            font-size: 0.875rem;
+        .badge-danger {
+            background: #f8d7da;
+            color: #721c24;
         }
         
         .loading {
             text-align: center;
-            padding: 20px;
+            padding: 40px;
             color: #7f8c8d;
+            font-size: 1.1rem;
         }
         
         .notification {
             position: fixed;
             top: 20px;
             right: 20px;
-            padding: 15px 25px;
-            border-radius: 6px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            padding: 15px 20px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
             z-index: 1000;
-            animation: slideIn 0.3s ease-out;
+            max-width: 300px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
         }
         
-        @keyframes slideIn {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+        .notification.show {
+            transform: translateX(0);
         }
         
         .notification.success {
-            background: #2ecc71;
-            color: white;
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
         }
         
         .notification.error {
-            background: #e74c3c;
-            color: white;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
         }
         
-        .tabs {
+        .notification.warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .notification.info {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .pagination {
+            padding: 20px;
+            text-align: center;
+            background: #f8f9fa;
+        }
+        
+        .pagination button {
+            padding: 10px 15px;
+            border: 2px solid #e9ecef;
+            background: white;
+            cursor: pointer;
+            margin: 0 5px;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .pagination button:hover:not(:disabled) {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .pagination .current {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .control-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            .listing-title {
+                max-width: 200px;
+            }
+        }
+
+        /* Poshmark Section Styles */
+        .poshmark-section, .drafts-section {
+            margin-top: 30px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border-color);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .section-header h2 {
+            margin: 0;
+            color: var(--primary-color);
+            font-size: 1.5em;
+        }
+
+        .poshmark-controls, .drafts-controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .input-group {
             display: flex;
             gap: 10px;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #ecf0f1;
+            align-items: center;
         }
-        
-        .tab {
-            padding: 10px 20px;
-            background: none;
+
+        .form-input {
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1em;
+            background: white;
+            color: var(--text-dark);
+            min-width: 250px;
+        }
+
+        .poshmark-listings {
+            min-height: 200px;
+            background: rgba(248, 249, 250, 0.5);
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .drafts-table-container {
+            overflow-x: auto;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border-color);
+        }
+
+        .drafts-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        .drafts-table th,
+        .drafts-table td {
+            border: 1px solid var(--border-color);
+            padding: 12px 15px;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        .drafts-table th {
+            background: var(--light-bg);
+            font-weight: 600;
+            color: var(--text-dark);
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .drafts-table tbody tr:nth-child(even) {
+            background: rgba(248, 249, 250, 0.5);
+        }
+
+        .drafts-table tbody tr:hover {
+            background: rgba(0, 123, 255, 0.05);
+        }
+
+        .drafts-pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+            gap: 10px;
+        }
+
+        .drafts-pagination button {
+            background: var(--primary-color);
+            color: white;
             border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 1rem;
-            color: #7f8c8d;
-            border-bottom: 3px solid transparent;
-            transition: all 0.2s;
+            transition: background 0.3s ease;
         }
-        
-        .tab.active {
-            color: #3498db;
-            border-bottom-color: #3498db;
+
+        .drafts-pagination button:disabled {
+            background: var(--secondary-color);
+            cursor: not-allowed;
+        }
+
+        .drafts-pagination button:hover:not(:disabled) {
+            background: var(--gradient-end);
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-draft {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .status-published {
+            background: #28a745;
+            color: white;
+        }
+
+        .status-failed {
+            background: #dc3545;
+            color: white;
+        }
+
+        .poshmark-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .poshmark-item {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color);
+        }
+
+        .poshmark-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .poshmark-details h4 {
+            margin: 0 0 10px 0;
+            color: var(--text-dark);
+            font-size: 1.1em;
+        }
+
+        .poshmark-details p {
+            margin: 5px 0;
+            color: var(--secondary-color);
+            font-size: 0.9em;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>🛒 eBay Store Automation</h1>
-            <div class="subtitle">Automated listing management, offers, and feedback</div>
-        </header>
+        <div class="header">
+            <h1>eBay Management Platform</h1>
+            <p>Professional eBay store management and automation</p>
+        </div>
         
-        <div class="stats-grid" id="stats">
-            <div class="stat-card">
+        <div class="stats-grid">
+            <div class="stat-card" onclick="showListings('active')">
                 <div class="stat-label">Active Listings</div>
-                <div class="stat-value" id="stat-active">-</div>
+                <div class="stat-value" id="stat-active">0</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" onclick="showListings('stale')">
                 <div class="stat-label">Stale Listings</div>
-                <div class="stat-value" id="stat-stale">-</div>
+                <div class="stat-value" id="stat-stale">0</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">Total Views</div>
-                <div class="stat-value" id="stat-views">-</div>
+                <div class="stat-value" id="stat-views">0</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">Total Watchers</div>
-                <div class="stat-value" id="stat-watchers">-</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Pending Feedback</div>
-                <div class="stat-value" id="stat-feedback">-</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Relists Today</div>
-                <div class="stat-value" id="stat-relists">-</div>
+                <div class="stat-value" id="stat-watchers">0</div>
             </div>
         </div>
         
-        <div class="actions-section">
-            <h2>⚡ Manual Actions</h2>
-            <div class="action-buttons">
-                <button class="btn btn-primary" onclick="triggerSync()">🔄 Sync Listings</button>
-                <button class="btn btn-warning" onclick="triggerStaleCheck()">🔍 Check Stale Listings</button>
-                <button class="btn btn-success" onclick="triggerOfferCheck()">💰 Check Offer Opportunities</button>
-                <button class="btn btn-primary" onclick="triggerFeedbackCheck()">⭐ Request Feedback</button>
+        <div class="controls">
+            <h2>Management Actions</h2>
+            <div class="control-buttons">
+                <button class="btn btn-primary" onclick="syncListings()">Sync Listings</button>
+                <button class="btn btn-warning" onclick="checkStale()">Check Stale</button>
+                <button class="btn btn-success" onclick="checkOffers()">Check Offers</button>
+                <button class="btn btn-info" onclick="refreshImages()">Refresh Images</button>
+                <button class="btn btn-info" onclick="showListings('active')">View Active</button>
+                <button class="btn btn-info" onclick="showListings('stale')">View Stale</button>
+                <button class="btn btn-secondary" onclick="showPoshmarkSection()">Poshmark Sync</button>
+                <button class="btn btn-secondary" onclick="showDraftsSection()">Manage Drafts</button>
             </div>
         </div>
         
-        <div class="jobs-section">
-            <h2>⏰ Scheduled Jobs</h2>
-            <div id="jobs-list" class="loading">Loading...</div>
+        <div class="listings-section" id="listings-section" style="display: none;">
+            <div class="listings-header">
+                <h2>Listings Management</h2>
+            </div>
+            <div style="padding: 20px;">
+                <div class="control-buttons" style="margin-bottom: 20px;">
+                    <select id="status-filter" onchange="loadListings()" style="padding: 10px; border: 2px solid #e9ecef; border-radius: 6px; font-size: 1rem;">
+                        <option value="active">Active Listings</option>
+                        <option value="stale">Stale Listings</option>
+                    </select>
+                    <input type="text" id="search-input" placeholder="Search listings..." onkeyup="loadListings()" style="padding: 10px; border: 2px solid #e9ecef; border-radius: 6px; font-size: 1rem;">
+                    <button class="btn btn-success" onclick="saveAllChanges()">Save All Changes</button>
+                </div>
+                
+                <table class="listings-table">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="select-all" onchange="toggleAll(this)"></th>
+                            <th>Image</th>
+                            <th>Title</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Views</th>
+                            <th>Watchers</th>
+                            <th>Days Listed</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listings-tbody">
+                        <tr><td colspan="9" class="loading">Loading listings...</td></tr>
+                    </tbody>
+                </table>
+                
+                <div class="pagination">
+                    <button onclick="changePage(-1)" id="prev-page">Previous</button>
+                    <span id="page-info">Page 1 of 1</span>
+                    <button onclick="changePage(1)" id="next-page">Next</button>
+                </div>
+            </div>
+        </div>
         </div>
         
-        <div class="logs-section">
-            <h2>📋 Recent Activity</h2>
-            <div class="tabs">
-                <button class="tab active" onclick="switchLogType('all')">All</button>
-                <button class="tab" onclick="switchLogType('relist')">Relists</button>
-                <button class="tab" onclick="switchLogType('offer')">Offers</button>
-                <button class="tab" onclick="switchLogType('feedback')">Feedback</button>
+        <!-- Poshmark Section -->
+        <div class="poshmark-section" id="poshmark-section" style="display: none;">
+            <div class="section-header">
+                <h2>Poshmark Integration</h2>
+                <button class="btn btn-secondary" onclick="hidePoshmarkSection()">Close</button>
             </div>
-            <div id="logs-list" class="log-list loading">Loading...</div>
+            
+            <div class="poshmark-controls">
+                <div class="input-group">
+                    <input type="text" id="poshmark-username" placeholder="Enter Poshmark username" class="form-input" value="ndwier">
+                    <button class="btn btn-primary" onclick="scrapePoshmarkUser()">Scrape Active Listings</button>
+                </div>
+            </div>
+            
+            <div class="poshmark-listings" id="poshmark-listings">
+                <div class="loading">Username "ndwier" is pre-filled. Click "Scrape Active Listings" to get started.</div>
+            </div>
         </div>
-    </div>
-    
+        
+        <!-- Drafts Section -->
+        <div class="drafts-section" id="drafts-section" style="display: none;">
+            <div class="section-header">
+                <h2>eBay Draft Management</h2>
+                <button class="btn btn-secondary" onclick="hideDraftsSection()">Close</button>
+            </div>
+            
+            <div class="drafts-controls">
+                <select id="draft-status-filter" onchange="loadDrafts()">
+                    <option value="draft">Draft</option>
+                    <option value="published">Published</option>
+                    <option value="failed">Failed</option>
+                </select>
+                <button class="btn btn-primary" onclick="loadDrafts()">Refresh</button>
+            </div>
+            
+            <div class="drafts-table-container">
+                <table class="drafts-table">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="select-all-drafts" onchange="toggleAllDrafts(this)"></th>
+                            <th>Image</th>
+                            <th>Title</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="drafts-tbody">
+                        <tr><td colspan="8" class="loading">Loading drafts...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="drafts-pagination">
+                <button onclick="changeDraftPage(-1)" id="prev-draft-page">Previous</button>
+                <span id="draft-page-info">Page 1 of 1</span>
+                <button onclick="changeDraftPage(1)" id="next-draft-page">Next</button>
+            </div>
+        </div>
+        
+        <div id="notification" class="notification"></div>
+
     <script>
-        let currentLogType = 'all';
+        let currentPage = 1;
+        let currentStatus = 'active';
+        let allListings = [];
+        let filteredListings = [];
+        const itemsPerPage = 20;
+        let editedListings = {};
         
-        async function loadStats() {
+        // Drafts variables
+        let currentDraftPage = 1;
+        let currentDraftStatus = 'draft';
+        let allDrafts = [];
+        const draftsPerPage = 20;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchMetrics();
+        });
+
+        function getImageUrl(galleryUrl, itemId) {
+            // If we have a gallery URL, use it
+            if (galleryUrl && galleryUrl.trim()) {
+                return galleryUrl;
+            }
+            
+            // Fallback to eBay's standard image URL format
+            if (itemId) {
+                return `https://i.ebayimg.com/images/g/${itemId}/s-l500.jpg`;
+            }
+            
+            // Ultimate fallback - return empty string to trigger onerror
+            return '';
+        }
+
+        async function fetchMetrics() {
             try {
                 const response = await fetch('/api/stats');
                 const data = await response.json();
@@ -360,196 +732,569 @@
                 document.getElementById('stat-stale').textContent = data.listings.stale;
                 document.getElementById('stat-views').textContent = data.listings.total_views.toLocaleString();
                 document.getElementById('stat-watchers').textContent = data.listings.total_watchers.toLocaleString();
-                document.getElementById('stat-feedback').textContent = data.sales.pending_feedback;
-                document.getElementById('stat-relists').textContent = data.automation.relists_today;
+                
             } catch (error) {
-                console.error('Error loading stats:', error);
+                console.error('Error fetching metrics:', error);
+                showNotification('Error fetching metrics', 'error');
             }
         }
-        
-        async function loadJobs() {
+
+        async function syncListings() {
+            showNotification('Syncing listings...', 'info');
             try {
-                const response = await fetch('/api/jobs');
+                const response = await fetch('/api/sync', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
                 const data = await response.json();
-                const jobsList = document.getElementById('jobs-list');
                 
-                if (data.jobs.length === 0) {
-                    jobsList.innerHTML = '<p>No scheduled jobs found</p>';
-                    return;
+                if (data.success) {
+                    showNotification(`Synced ${data.count} listings successfully!`, 'success');
+                    fetchMetrics(); // Refresh stats
+                } else {
+                    showNotification(`Sync failed: ${data.error}`, 'error');
                 }
-                
-                jobsList.innerHTML = data.jobs.map(job => `
-                    <div class="job-item">
-                        <div class="job-name">${job.name}</div>
-                        <div class="job-next">Next run: ${job.next_run ? new Date(job.next_run).toLocaleString() : 'Not scheduled'}</div>
-                    </div>
-                `).join('');
             } catch (error) {
-                console.error('Error loading jobs:', error);
-                document.getElementById('jobs-list').innerHTML = '<p>Error loading jobs</p>';
+                console.error('Error syncing listings:', error);
+                showNotification('Error syncing listings', 'error');
             }
         }
-        
-        async function loadLogs() {
+
+        async function checkStale() {
+            showNotification('Checking for stale listings...', 'info');
             try {
-                const url = currentLogType === 'all' ? '/api/logs' : `/api/logs?type=${currentLogType}`;
-                const response = await fetch(url);
+                const response = await fetch('/api/check-stale', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
                 const data = await response.json();
-                const logsList = document.getElementById('logs-list');
                 
-                if (data.items.length === 0) {
-                    logsList.innerHTML = '<p>No logs found</p>';
-                    return;
+                if (data.success) {
+                    showNotification(`Found ${data.stale_count} stale listings`, 'warning');
+                    fetchMetrics(); // Refresh stats
+                } else {
+                    showNotification(`Check failed: ${data.error}`, 'error');
                 }
-                
-                logsList.innerHTML = data.items.map(log => `
-                    <div class="log-item">
-                        <div>
-                            <strong>${log.action_type}</strong>
-                            ${log.item_id ? `- ${log.item_id}` : ''}
-                            <br>
-                            <small>${log.message}</small>
-                        </div>
-                        <div style="text-align: right;">
-                            <span class="log-status ${log.status}">${log.status}</span>
-                            <div class="log-time">${new Date(log.created_at).toLocaleString()}</div>
-                        </div>
-                    </div>
-                `).join('');
             } catch (error) {
-                console.error('Error loading logs:', error);
-                document.getElementById('logs-list').innerHTML = '<p>Error loading logs</p>';
+                console.error('Error checking stale listings:', error);
+                showNotification('Error checking stale listings', 'error');
             }
         }
-        
-        function switchLogType(type) {
-            currentLogType = type;
-            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-            event.target.classList.add('active');
-            loadLogs();
+
+        async function checkOffers() {
+            showNotification('Checking offer opportunities...', 'info');
+            try {
+                const response = await fetch('/api/check-offers', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification(`Found ${data.eligible_count} listings eligible for offers`, 'success');
+                } else {
+                    showNotification(`Check failed: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error checking offers:', error);
+                showNotification('Error checking offers', 'error');
+            }
         }
-        
-        function showNotification(message, type = 'success') {
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
+
+        async function refreshImages() {
+            showNotification('Refreshing listing images...', 'info');
+            try {
+                const response = await fetch('/api/refresh-images', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification(`Refreshed images for ${data.updated} listings`, 'success');
+                    // Refresh the listings view if it's open
+                    if (document.getElementById('listings-section').style.display !== 'none') {
+                        loadListings();
+                    }
+                } else {
+                    showNotification(`Refresh failed: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error refreshing images:', error);
+                showNotification('Error refreshing images', 'error');
+            }
+        }
+
+        function showListings(status) {
+            currentStatus = status;
+            document.getElementById('status-filter').value = status;
+            document.getElementById('listings-section').style.display = 'block';
+            currentPage = 1;
+            loadListings();
+        }
+
+        async function loadListings() {
+            const searchInput = document.getElementById('search-input').value.toLowerCase();
+            document.getElementById('listings-tbody').innerHTML = '<tr><td colspan="9" class="loading">Loading listings...</td></tr>';
+
+            try {
+                const response = await fetch(`/api/listings?status=${currentStatus}&page=${currentPage}&per_page=${itemsPerPage}`);
+                const data = await response.json();
+                allListings = data.items;
+                
+                filteredListings = allListings.filter(listing => 
+                    listing.title.toLowerCase().includes(searchInput)
+                );
+
+                renderListings();
+            } catch (error) {
+                console.error('Error loading listings:', error);
+                showNotification('Error loading listings', 'error');
+                document.getElementById('listings-tbody').innerHTML = '<tr><td colspan="9" class="loading">Failed to load listings.</td></tr>';
+            }
+        }
+
+        function renderListings() {
+            const tbody = document.getElementById('listings-tbody');
+            let html = '';
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const listingsToRender = filteredListings.slice(startIndex, endIndex);
+
+            if (listingsToRender.length === 0) {
+                html = '<tr><td colspan="9" class="loading">No listings found.</td></tr>';
+            } else {
+                for (const listing of listingsToRender) {
+                    const isEdited = editedListings[listing.item_id] !== undefined;
+                    const currentPrice = editedListings[listing.item_id]?.price !== undefined ? editedListings[listing.item_id].price : listing.price;
+                    const currentQuantity = editedListings[listing.item_id]?.quantity !== undefined ? editedListings[listing.item_id].quantity : listing.quantity;
+
+                    html += `
+                        <tr id="row-${listing.item_id}" class="${isEdited ? 'edited-row' : ''}">
+                            <td><input type="checkbox" class="listing-checkbox" data-item-id="${listing.item_id}"></td>
+                            <td><img src="${getImageUrl(listing.gallery_url, listing.item_id)}" alt="${listing.title}" class="listing-image" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjRjVGNUY1Ii8+CjxwYXRoIGQ9Ik0yMCAyMEg0MFY0MEgyMFYyMFoiIGZpbGw9IiNEOUQ5RDkiLz4KPHBhdGggZD0iTTI1IDI1SDM1VjM1SDI1VjI1WiIgZmlsbD0iI0NDQ0NDQyIvPgo8L3N2Zz4K'"></td>
+                            <td><div class="listing-title">${listing.title}</div></td>
+                            <td><input type="number" step="0.01" value="${currentPrice.toFixed(2)}" class="price-input" data-item-id="${listing.item_id}" onchange="handleEdit('${listing.item_id}', 'price', this.value)"></td>
+                            <td><input type="number" value="${currentQuantity}" class="quantity-input" data-item-id="${listing.item_id}" onchange="handleEdit('${listing.item_id}', 'quantity', this.value)"></td>
+                            <td>${listing.view_count}</td>
+                            <td>${listing.watch_count}</td>
+                            <td>${listing.days_listed}</td>
+                            <td>
+                                <button class="action-btn save" onclick="saveChanges('${listing.item_id}')">Save</button>
+                                <button class="action-btn relist" onclick="relistItem('${listing.item_id}')">Relist</button>
+                                <button class="action-btn offer" onclick="sendOffer('${listing.item_id}')">Offer</button>
+                            </td>
+                        </tr>
+                    `;
+                }
+            }
+            tbody.innerHTML = html;
+            updatePaginationControls();
+        }
+
+        function handleEdit(itemId, field, value) {
+            if (!editedListings[itemId]) {
+                editedListings[itemId] = { item_id: itemId, original_price: null, original_quantity: null };
+            }
+            if (field === 'price') {
+                if (editedListings[itemId].original_price === null) editedListings[itemId].original_price = parseFloat(document.querySelector(`.price-input[data-item-id="${itemId}"]`).defaultValue);
+                editedListings[itemId].price = parseFloat(value);
+            } else if (field === 'quantity') {
+                if (editedListings[itemId].original_quantity === null) editedListings[itemId].original_quantity = parseInt(document.querySelector(`.quantity-input[data-item-id="${itemId}"]`).defaultValue);
+                editedListings[itemId].quantity = parseInt(value);
+            }
+            document.getElementById(`row-${itemId}`).classList.add('edited-row');
+        }
+
+        async function saveChanges(itemId) {
+            const listingData = editedListings[itemId];
+            if (!listingData) {
+                showNotification('No changes to save for this listing.', 'info');
+                return;
+            }
+
+            let successCount = 0;
+            let errorCount = 0;
+
+            if (listingData.price !== undefined && listingData.price !== listingData.original_price) {
+                const priceSuccess = await updateListingAttribute(itemId, 'price', listingData.price);
+                if (priceSuccess) successCount++; else errorCount++;
+            }
+            if (listingData.quantity !== undefined && listingData.quantity !== listingData.original_quantity) {
+                const quantitySuccess = await updateListingAttribute(itemId, 'quantity', listingData.quantity);
+                if (quantitySuccess) successCount++; else errorCount++;
+            }
+
+            if (successCount > 0) {
+                showNotification(`Saved changes for ${itemId}.`, 'success');
+                delete editedListings[itemId];
+                document.getElementById(`row-${itemId}`).classList.remove('edited-row');
+                loadListings();
+            } else if (errorCount > 0) {
+                showNotification(`Failed to save some changes for ${itemId}.`, 'error');
+            } else {
+                showNotification('No changes detected to save.', 'info');
+            }
+        }
+
+        async function saveAllChanges() {
+            const selectedCheckboxes = document.querySelectorAll('.listing-checkbox:checked');
+            if (selectedCheckboxes.length === 0) {
+                showNotification('No listings selected for bulk save.', 'info');
+                return;
+            }
+
+            let totalSuccess = 0;
+            let totalFailed = 0;
+
+            for (const checkbox of selectedCheckboxes) {
+                const itemId = checkbox.dataset.itemId;
+                const listingData = editedListings[itemId];
+                if (!listingData) continue;
+
+                let successCount = 0;
+                let errorCount = 0;
+
+                if (listingData.price !== undefined && listingData.price !== listingData.original_price) {
+                    const priceSuccess = await updateListingAttribute(itemId, 'price', listingData.price);
+                    if (priceSuccess) successCount++; else errorCount++;
+                }
+                if (listingData.quantity !== undefined && listingData.quantity !== listingData.original_quantity) {
+                    const quantitySuccess = await updateListingAttribute(itemId, 'quantity', listingData.quantity);
+                    if (quantitySuccess) successCount++; else errorCount++;
+                }
+
+                if (successCount > 0) {
+                    totalSuccess++;
+                    delete editedListings[itemId];
+                    document.getElementById(`row-${itemId}`).classList.remove('edited-row');
+                } else if (errorCount > 0) {
+                    totalFailed++;
+                }
+            }
+            showNotification(`Bulk save complete. ${totalSuccess} listings updated, ${totalFailed} failed.`, totalFailed === 0 ? 'success' : 'warning');
+            loadListings();
+        }
+
+        async function updateListingAttribute(itemId, attribute, value) {
+            try {
+                const response = await fetch(`/api/listings/${itemId}/${attribute}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ [attribute]: value })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    return true;
+                } else {
+                    showNotification(`Failed to update ${attribute} for ${itemId}: ${data.error}`, 'error');
+                    return false;
+                }
+            } catch (error) {
+                console.error(`Error updating ${attribute} for ${itemId}:`, error);
+                showNotification(`Error updating ${attribute} for ${itemId}`, 'error');
+                return false;
+            }
+        }
+
+        async function relistItem(itemId) {
+            showNotification(`Relisting item ${itemId}...`, 'info');
+            try {
+                const response = await fetch(`/api/relist/${itemId}`, { method: 'POST' });
+                const data = await response.json();
+                if (data.success) {
+                    showNotification(`Item ${itemId} relisted successfully!`, 'success');
+                    loadListings();
+                } else {
+                    showNotification(`Failed to relist item ${itemId}: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error relisting item:', error);
+                showNotification('Error relisting item', 'error');
+            }
+        }
+
+        async function sendOffer(itemId) {
+            showNotification(`Sending offer for item ${itemId}...`, 'info');
+            try {
+                const response = await fetch(`/api/send-offer/${itemId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ discount_percent: 5 })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showNotification(`Offer sent for item ${itemId}!`, 'success');
+                } else {
+                    showNotification(`Failed to send offer for ${itemId}: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error sending offer:', error);
+                showNotification('Error sending offer', 'error');
+            }
+        }
+
+        function changePage(direction) {
+            const totalPages = Math.ceil(filteredListings.length / itemsPerPage);
+            currentPage += direction;
+            if (currentPage < 1) currentPage = 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+            renderListings();
+        }
+
+        function updatePaginationControls() {
+            const totalPages = Math.ceil(filteredListings.length / itemsPerPage);
+            document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages}`;
+            document.getElementById('prev-page').disabled = currentPage === 1;
+            document.getElementById('next-page').disabled = currentPage === totalPages;
+        }
+
+        function toggleAll(source) {
+            const checkboxes = document.querySelectorAll('.listing-checkbox');
+            for (const checkbox of checkboxes) {
+                checkbox.checked = source.checked;
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
             notification.textContent = message;
-            document.body.appendChild(notification);
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
             
             setTimeout(() => {
-                notification.remove();
-            }, 3000);
+                notification.classList.remove('show');
+            }, 5000);
         }
-        
-        async function triggerSync() {
-            const btn = event.target;
-            btn.disabled = true;
-            btn.textContent = '⏳ Syncing...';
-            
+
+        // Poshmark Functions
+        function showPoshmarkSection() {
+            document.getElementById('poshmark-section').style.display = 'block';
+            document.getElementById('listings-section').style.display = 'none';
+            document.getElementById('drafts-section').style.display = 'none';
+        }
+
+        function hidePoshmarkSection() {
+            document.getElementById('poshmark-section').style.display = 'none';
+        }
+
+        async function scrapePoshmarkUser() {
+            const username = document.getElementById('poshmark-username').value.trim();
+            if (!username) {
+                showNotification('Please enter a Poshmark username', 'error');
+                return;
+            }
+
+            showNotification('Scraping Poshmark listings...', 'info');
+            document.getElementById('poshmark-listings').innerHTML = '<div class="loading">Scraping listings, please wait...</div>';
+
             try {
-                const response = await fetch('/api/sync', { method: 'POST' });
+                const response = await fetch('/api/poshmark/scrape', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username: username })
+                });
+
                 const data = await response.json();
-                
+
                 if (data.success) {
-                    showNotification(`Sync complete! Updated ${data.result.updated} listings`, 'success');
-                    loadStats();
-                    loadLogs();
+                    showNotification(`Scraped ${data.successfully_scraped} listings from ${username}`, 'success');
+                    displayPoshmarkListings(data.listings);
                 } else {
-                    showNotification('Sync failed: ' + data.error, 'error');
+                    showNotification(`Failed to scrape listings: ${data.error}`, 'error');
+                    document.getElementById('poshmark-listings').innerHTML = '<div class="loading">Scraping failed. Please try again.</div>';
                 }
             } catch (error) {
-                showNotification('Sync failed: ' + error.message, 'error');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = '🔄 Sync Listings';
+                console.error('Error scraping Poshmark:', error);
+                showNotification('Error scraping Poshmark listings', 'error');
+                document.getElementById('poshmark-listings').innerHTML = '<div class="loading">Scraping failed. Please try again.</div>';
             }
         }
-        
-        async function triggerStaleCheck() {
-            const btn = event.target;
-            btn.disabled = true;
-            btn.textContent = '⏳ Checking...';
+
+        function displayPoshmarkListings(listings) {
+            const container = document.getElementById('poshmark-listings');
             
+            if (listings.length === 0) {
+                container.innerHTML = '<div class="loading">No listings found for this user.</div>';
+                return;
+            }
+
+            let html = '<div class="poshmark-grid">';
+            listings.forEach(listing => {
+                const imageUrl = listing.images && listing.images.length > 0 ? listing.images[0] : '';
+                html += `
+                    <div class="poshmark-item">
+                        <img src="${imageUrl}" alt="${listing.title}" class="poshmark-image" onerror="this.style.display='none'">
+                        <div class="poshmark-details">
+                            <h4>${listing.title}</h4>
+                            <p><strong>Price:</strong> $${listing.price}</p>
+                            <p><strong>Brand:</strong> ${listing.brand || 'Unknown'}</p>
+                            <p><strong>Size:</strong> ${listing.size || 'Unknown'}</p>
+                            <p><strong>Condition:</strong> ${listing.condition}</p>
+                            <button class="btn btn-primary" onclick="createDraftFromPoshmark(${listing.id})">Create Draft</button>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+
+            container.innerHTML = html;
+        }
+
+        async function createDraftFromPoshmark(listingId) {
+            showNotification('Creating eBay draft...', 'info');
+
             try {
-                const response = await fetch('/api/check-stale', { method: 'POST' });
+                const response = await fetch('/api/poshmark/create-drafts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ listing_ids: [listingId] })
+                });
+
                 const data = await response.json();
-                
+
                 if (data.success) {
-                    showNotification(`Found ${data.result.stale_count} stale listings, relisted ${data.result.relisted}`, 'success');
-                    loadStats();
-                    loadLogs();
+                    showNotification(`Created ${data.created} eBay draft(s)`, 'success');
                 } else {
-                    showNotification('Check failed: ' + data.error, 'error');
+                    showNotification(`Failed to create draft: ${data.error}`, 'error');
                 }
             } catch (error) {
-                showNotification('Check failed: ' + error.message, 'error');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = '🔍 Check Stale Listings';
+                console.error('Error creating draft:', error);
+                showNotification('Error creating draft', 'error');
             }
         }
-        
-        async function triggerOfferCheck() {
-            const btn = event.target;
-            btn.disabled = true;
-            btn.textContent = '⏳ Checking...';
-            
+
+        // Drafts Functions
+        function showDraftsSection() {
+            document.getElementById('drafts-section').style.display = 'block';
+            document.getElementById('listings-section').style.display = 'none';
+            document.getElementById('poshmark-section').style.display = 'none';
+            loadDrafts();
+        }
+
+        function hideDraftsSection() {
+            document.getElementById('drafts-section').style.display = 'none';
+        }
+
+        async function loadDrafts() {
+            currentDraftStatus = document.getElementById('draft-status-filter').value;
+            document.getElementById('drafts-tbody').innerHTML = '<tr><td colspan="8" class="loading">Loading drafts...</td></tr>';
+
             try {
-                const response = await fetch('/api/check-offers', { method: 'POST' });
+                const response = await fetch(`/api/drafts?status=${currentDraftStatus}&page=${currentDraftPage}&per_page=${draftsPerPage}`);
                 const data = await response.json();
-                
-                if (data.success) {
-                    showNotification(`Found ${data.result.opportunities_found} offer opportunities`, 'success');
-                    loadStats();
-                    loadLogs();
+
+                if (data.items) {
+                    allDrafts = data.items;
+                    renderDrafts();
                 } else {
-                    showNotification('Check failed: ' + data.error, 'error');
+                    showNotification('Error loading drafts', 'error');
+                    document.getElementById('drafts-tbody').innerHTML = '<tr><td colspan="8" class="loading">Failed to load drafts.</td></tr>';
                 }
             } catch (error) {
-                showNotification('Check failed: ' + error.message, 'error');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = '💰 Check Offer Opportunities';
+                console.error('Error loading drafts:', error);
+                showNotification('Error loading drafts', 'error');
+                document.getElementById('drafts-tbody').innerHTML = '<tr><td colspan="8" class="loading">Failed to load drafts.</td></tr>';
             }
         }
-        
-        async function triggerFeedbackCheck() {
-            const btn = event.target;
-            btn.disabled = true;
-            btn.textContent = '⏳ Checking...';
-            
+
+        function renderDrafts() {
+            const tbody = document.getElementById('drafts-tbody');
+            let html = '';
+
+            if (allDrafts.length === 0) {
+                html = '<tr><td colspan="8" class="loading">No drafts found.</td></tr>';
+            } else {
+                allDrafts.forEach(draft => {
+                    const imageUrl = draft.images && draft.images.length > 0 ? draft.images[0] : '';
+                    const statusClass = `status-${draft.status}`;
+                    const createdDate = new Date(draft.created_at).toLocaleDateString();
+
+                    html += `
+                        <tr>
+                            <td><input type="checkbox" class="draft-checkbox" data-draft-id="${draft.id}"></td>
+                            <td><img src="${imageUrl}" alt="${draft.title}" class="listing-image" onerror="this.style.display='none'"></td>
+                            <td><div class="listing-title">${draft.title}</div></td>
+                            <td>$${draft.price}</td>
+                            <td>${draft.quantity}</td>
+                            <td><span class="status-badge ${statusClass}">${draft.status}</span></td>
+                            <td>${createdDate}</td>
+                            <td>
+                                <button class="btn btn-primary" onclick="editDraft(${draft.id})">Edit</button>
+                                ${draft.status === 'draft' ? `<button class="btn btn-success" onclick="publishDraft(${draft.id})">Publish</button>` : ''}
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+
+            tbody.innerHTML = html;
+            updateDraftPaginationControls();
+        }
+
+        function updateDraftPaginationControls() {
+            const totalPages = Math.ceil(allDrafts.length / draftsPerPage);
+            document.getElementById('draft-page-info').textContent = `Page ${currentDraftPage} of ${totalPages}`;
+            document.getElementById('prev-draft-page').disabled = currentDraftPage === 1;
+            document.getElementById('next-draft-page').disabled = currentDraftPage === totalPages;
+        }
+
+        function changeDraftPage(direction) {
+            const totalPages = Math.ceil(allDrafts.length / draftsPerPage);
+            currentDraftPage += direction;
+            if (currentDraftPage < 1) currentDraftPage = 1;
+            if (currentDraftPage > totalPages) currentDraftPage = totalPages;
+            loadDrafts();
+        }
+
+        function toggleAllDrafts(source) {
+            const checkboxes = document.querySelectorAll('.draft-checkbox');
+            for (const checkbox of checkboxes) {
+                checkbox.checked = source.checked;
+            }
+        }
+
+        async function editDraft(draftId) {
+            // Placeholder for draft editing - would open a modal or navigate to edit page
+            showNotification(`Edit draft ${draftId} - Feature coming soon!`, 'info');
+        }
+
+        async function publishDraft(draftId) {
+            showNotification(`Publishing draft ${draftId}...`, 'info');
+
             try {
-                const response = await fetch('/api/check-feedback', { method: 'POST' });
+                const response = await fetch(`/api/drafts/${draftId}/publish`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
                 const data = await response.json();
-                
+
                 if (data.success) {
-                    showNotification(`Sent ${data.result.requests_sent} feedback requests`, 'success');
-                    loadStats();
-                    loadLogs();
+                    showNotification(`Draft ${draftId} published successfully!`, 'success');
+                    loadDrafts(); // Refresh the drafts list
                 } else {
-                    showNotification('Check failed: ' + data.error, 'error');
+                    showNotification(`Failed to publish draft: ${data.error}`, 'error');
                 }
             } catch (error) {
-                showNotification('Check failed: ' + error.message, 'error');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = '⭐ Request Feedback';
+                console.error('Error publishing draft:', error);
+                showNotification('Error publishing draft', 'error');
             }
         }
-        
-        // Initial load
-        loadStats();
-        loadJobs();
-        loadLogs();
-        
-        // Refresh data every 30 seconds
-        setInterval(() => {
-            loadStats();
-            loadLogs();
-        }, 30000);
-        
-        // Refresh jobs every 5 minutes
-        setInterval(loadJobs, 300000);
     </script>
 </body>
 </html>
-

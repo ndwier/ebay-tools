@@ -62,3 +62,4 @@ echo "🛑 Stop the service with: docker-compose down"
 echo ""
 echo "Happy automating! 🎉"
 
+
